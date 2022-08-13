@@ -1,4 +1,4 @@
-import { of, from } from 'rxjs'; 
+import { of, from, BehaviorSubject } from 'rxjs'; 
 import { map, mergeMap, delay, mergeAll, switchMap, switchAll, concatMap, concatAll, exhaustMap } from 'rxjs/operators';
 
 const getData = (param) => {
@@ -104,4 +104,31 @@ document.getElementById('exhaust-map').addEventListener('click', () => {
   ).subscribe(value => {
     displayResult(value);
   });
+});
+
+
+const filters = ['brand=porsche', 'model=911', 'horsepower=389', 'color=red'];
+const activeFilters = new BehaviorSubject('');
+const applyFilters = () => {
+  filters.forEach((filter, index) => {
+    let newFilters = activeFilters.value;
+    if (index === 0) {
+      newFilters = `?${filter}`
+    } else {
+      newFilters = `${newFilters}&${filter}`
+    }
+    activeFilters.next(newFilters)
+  })
+}
+
+// using switchMap
+activeFilters.pipe(
+  switchMap(param => getData(param))
+).subscribe(value => {
+  displayResult(value);
+});
+
+document.getElementById('switch-map-filters').addEventListener('click', () => {
+  result.innerHTML = '';
+  applyFilters();
 });
